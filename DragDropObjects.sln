@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DragDropObjects", "DragDropObjects.csproj", "{84BE5D05-BC87-4AFA-925B-8B9896E881EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DragDropThumbOps", "..\DragDropThumbOps\DragDropThumbOps.csproj", "{5AD0F28C-8F2E-48BE-9944-93DF86A26266}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp1", "..\WpfApp1\WpfApp1.csproj", "{861D761A-FF1A-4098-B202-87EF7A1B499D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{84BE5D05-BC87-4AFA-925B-8B9896E881EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84BE5D05-BC87-4AFA-925B-8B9896E881EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84BE5D05-BC87-4AFA-925B-8B9896E881EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AD0F28C-8F2E-48BE-9944-93DF86A26266}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AD0F28C-8F2E-48BE-9944-93DF86A26266}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AD0F28C-8F2E-48BE-9944-93DF86A26266}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AD0F28C-8F2E-48BE-9944-93DF86A26266}.Release|Any CPU.Build.0 = Release|Any CPU
+		{861D761A-FF1A-4098-B202-87EF7A1B499D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{861D761A-FF1A-4098-B202-87EF7A1B499D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{861D761A-FF1A-4098-B202-87EF7A1B499D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{861D761A-FF1A-4098-B202-87EF7A1B499D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
