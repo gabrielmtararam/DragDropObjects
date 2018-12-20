@@ -8,15 +8,14 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace DragDropObjects
-{
-    public class SimpleCircleAdorner : Adorner
+namespace resizeTestWpf { 
+    public class ResizeAdorner : Adorner
     {
         private readonly Rectangle _child;
         private double _leftOffset;
         private double _topOffset;
         // Be sure to call the base class constructor.
-        public SimpleCircleAdorner(UIElement adornedElement)
+        public ResizeAdorner(UIElement adornedElement)
             : base(adornedElement)
         {
             var brush = new VisualBrush(adornedElement);
@@ -72,11 +71,14 @@ namespace DragDropObjects
             // Some arbitrary drawing implements.
             var renderBrush = new SolidColorBrush(Colors.Green) {Opacity = 0.2};
             var renderPen = new Pen(new SolidColorBrush(Colors.Navy), 1.5);
-            const double renderRadius = 5.0;
+            const double renderRadius = 40.0;
 
             // Just draw a circle at each corner.
-            drawingContext.DrawRectangle(renderBrush, renderPen, adornedElementRect);
+          
 
+            drawingContext.DrawEllipse(renderBrush, renderPen, new Point((adornedElementRect.BottomRight.X- adornedElementRect.TopLeft.X)/2, 
+               ( adornedElementRect.BottomRight.Y - adornedElementRect.TopLeft.Y) / 2), renderRadius,
+                renderRadius);
         }
 
         protected override Size MeasureOverride(Size constraint)

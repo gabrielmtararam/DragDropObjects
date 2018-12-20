@@ -18,16 +18,17 @@ namespace DragDropObjects
     {
         private bool _isDown;
         private bool _isDragging;
-        private Canvas _myCanvas;
+     
         private UIElement _originalElement;
         private double _originalLeft;
         private double _originalTop;
         private SimpleCircleAdorner _overlayElement;
+        private ResizeAdorner _resizeAdorner;
         private Point _startPoint;
-        TextBox tb;
+       
         public void OnPageLoad(object sender, RoutedEventArgs e)
         {
-            _myCanvas = new Canvas();
+            
             _myCanvas.Width = 350;
             _myCanvas.Height = 350;
 
@@ -41,19 +42,25 @@ namespace DragDropObjects
             Canvas.SetLeft(rect1, 8);
 
 
-             tb = new TextBox {Text = "This is a TextBox. Drag and drop me"};
-            Canvas.SetTop(tb, 100);
-            Canvas.SetLeft(tb, 100);
+           
+           
 
             _myCanvas.Children.Add(rect1);
-            _myCanvas.Children.Add(tb);
+            
 
             _myCanvas.PreviewMouseLeftButtonDown += MyCanvas_PreviewMouseLeftButtonDown;
             _myCanvas.PreviewMouseMove += MyCanvas_PreviewMouseMove;
             _myCanvas.PreviewMouseLeftButtonUp += MyCanvas_PreviewMouseLeftButtonUp;
             PreviewKeyDown += window1_PreviewKeyDown;
 
-            myStackPanel.Children.Add(_myCanvas);
+            _resizeAdorner = new ResizeAdorner(btn1);
+            var layer = AdornerLayer.GetAdornerLayer(btn1);
+            layer.Add(_resizeAdorner);
+
+
+
+
+
         }
 
         private void window1_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -123,134 +130,53 @@ namespace DragDropObjects
         }
 
 
-        private double getNextLeftOffset(SimpleCircleAdorner _ovElement, UIElement _orElement, Canvas _canv, Point startPoint)
+        //this function is hard to uderstand because it take too many conditions to verify, the current position of the adorner, the current position of the mouse
+        //to prevent from control get out of the bounds of the container, don't think that are a simple way to solve this problem
+        private double getNextOffset( double startPosition, double OffsetRelativeToStartPos, double inner_size, double outtersize, double mousePosrelativeToInner, double MousePosRelativeToOutter, double OriginalDistanceToOutterCorner)
         {
-            var currentPosition = Mouse.GetPosition(_canv);
-            var currentPositionMovedOverlay = Mouse.GetPosition(_ovElement);
+            // that code bellow prevent from getting negative distance (when the mouse is out of the bounds) or far from the width/height (positive)
+            if (mousePosrelativeToInner > inner_size)
+                mousePosrelativeToInner = inner_size;
+            else if (mousePosrelativeToInner < 0)
+                mousePosrelativeToInner = 0;
+            //
+            var position = OriginalDistanceToOutterCorner + OffsetRelativeToStartPos;
+            var rightDistance = OriginalDistanceToOutterCorner + OffsetRelativeToStartPos + inner_size;
+            var maxLeftOfset = OriginalDistanceToOutterCorner;
 
-            double clickDistToBorderOverlay = currentPositionMovedOverlay.X;
-            if (clickDistToBorderOverlay > _ovElement.ActualWidth)
-            {
-                clickDistToBorderOverlay = _ovElement.ActualWidth;
-            }
-
-            if (clickDistToBorderOverlay < 0)
-            {
-                clickDistToBorderOverlay = 0;
-            }
-
-            var position = Canvas.GetLeft(_orElement) + _ovElement.LeftOffset;
-            var rightDistance = Canvas.GetLeft(_orElement) + _ovElement.LeftOffset + _ovElement.ActualWidth;
-
-            var maxLeftOfset = Canvas.GetLeft(_orElement);
-
-
-            if (_ovElement.LeftOffset < 0)
-            {
-                if (position <= 0 && (currentPosition.X - clickDistToBorderOverlay) <= 0)
-                {
+            // caso esteja a esquerda/topo <0, a direita, ou na po
+            if (OffsetRelativeToStartPos < 0){  // se estiver a esquerda/abaixo a da posicao original
+                // se o objeto estiver dentro do outter, pelo canto esquerdo/topo, e a posicao arrastada do mouse estiver a direita/abaixo do canto esquerdo/topo  do outter
+                if (position <= 0 && (MousePosRelativeToOutter - mousePosrelativeToInner) <= 0){ // se a posicao atual{
                     return (0 - maxLeftOfset);
                 }
             }
-            else if (_ovElement.LeftOffset>0)
-            {
-                    if ((rightDistance >= _canv.ActualWidth) && ((currentPosition.X + clickDistToBorderOverlay) >= _canv.ActualWidth))
-                    {
-                        return _canv.ActualWidth - maxLeftOfset - _ovElement.ActualWidth;
+            else if (OffsetRelativeToStartPos > 0){ //se estiver a direita/acima da posicao original
+                // se o objeto estiver dentro do outter, pelo canto direito/top, e a posicao arrastada do mouse estiver a esquerd/acimaa do canto direito/topo do outter
+                if ((rightDistance >= outtersize) && ((MousePosRelativeToOutter + mousePosrelativeToInner) >= outtersize)){
+                        return outtersize - maxLeftOfset - inner_size;
                     }      
             }
-            else if (_ovElement.LeftOffset == 0)  { 
-                if ((Canvas.GetLeft(_orElement) <= 0)&& (currentPosition.X<=0))
-                {
+            else if (OffsetRelativeToStartPos == 0)   {  //se estiver exatamente na posicao inicial
+                // se o mouse estiver fora da area do outter retorna 0
+                if ( (MousePosRelativeToOutter <= 0) || (MousePosRelativeToOutter >= outtersize)){
                     return 0;
                 }
+            }
 
-                if (((Canvas.GetLeft(_orElement) + _ovElement.ActualWidth) >= _canv.ActualWidth) && (currentPosition.X >=_canv.ActualWidth))
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return currentPosition.X - startPoint.X;
-            }
-            return currentPosition.X - startPoint.X;
+            return MousePosRelativeToOutter - startPosition;
         }
 
-
-
-        private double getNextTopOffset(SimpleCircleAdorner _ovElement, UIElement _orElement, Canvas _canv, Point startPoint)
-        {
-            var currentPosition = Mouse.GetPosition(_canv);
-            var currentPositionMovedOverlay = Mouse.GetPosition(_ovElement);
-
-            double clickDistToBorderOverlay = currentPositionMovedOverlay.Y;
-            if (clickDistToBorderOverlay > _ovElement.ActualHeight)
-            {
-                clickDistToBorderOverlay = _ovElement.ActualHeight;
-            }
-
-            if (clickDistToBorderOverlay < 0)
-            {
-                clickDistToBorderOverlay = 0;
-            }
-
-            var position = Canvas.GetTop(_orElement) + _ovElement.TopOffset;
-            var rightDistance = Canvas.GetTop(_orElement) + _ovElement.TopOffset + _ovElement.ActualHeight;
-
-            var maxLeftOfset = Canvas.GetTop(_orElement);
-
-            Console.WriteLine($"positionover {position} acthight {_canv.ActualHeight}");
-            if (_ovElement.TopOffset < 0)
-            {
-                
-                if (position <= 0 && (currentPosition.Y - clickDistToBorderOverlay) <= 0)
-                {
-                    Console.WriteLine($"1");
-                    return (0 - maxLeftOfset);
-                }
-                Console.WriteLine($"0");
-            }
-            else if (_ovElement.TopOffset > 0)
-            {
-                if ((rightDistance >= _canv.ActualHeight) && ((currentPosition.Y + clickDistToBorderOverlay) >= _canv.ActualWidth))
-                {
-                    Console.WriteLine($"3");
-                    return _canv.ActualHeight - maxLeftOfset - _ovElement.ActualHeight;
-                }
-                Console.WriteLine($"2");
-            }
-            else if (_ovElement.TopOffset == 0)
-            {
-                if ((Canvas.GetTop(_orElement) <= 0) && (currentPosition.Y <= 0))
-                {
-                    Console.WriteLine($"5");
-                    return 0;
-                }
-
-                if (((Canvas.GetTop(_orElement) + _ovElement.ActualHeight) >= _canv.ActualHeight) && (currentPosition.Y >= _canv.ActualHeight))
-                {
-                    Console.WriteLine($"6");
-                    return 0;
-                }
-                Console.WriteLine($"4");
-            }
-            else
-            {
-                Console.WriteLine($"7");
-                return currentPosition.Y - startPoint.Y;
-            }
-            return currentPosition.Y - startPoint.Y;
-        }
-
+        
         private void DragMoved()
         {
-            _overlayElement.LeftOffset = getNextLeftOffset(_overlayElement, _originalElement, _myCanvas, _startPoint);
+            _overlayElement.LeftOffset = getNextOffset( _startPoint.X, _overlayElement.LeftOffset, _overlayElement.ActualWidth, _myCanvas.ActualWidth, Mouse.GetPosition(_overlayElement).X, Mouse.GetPosition(_myCanvas).X, Canvas.GetLeft(_originalElement));
+            _overlayElement.TopOffset = getNextOffset(_startPoint.Y, _overlayElement.TopOffset, _overlayElement.ActualHeight, _myCanvas.ActualHeight, Mouse.GetPosition(_overlayElement).Y, Mouse.GetPosition(_myCanvas).Y, Canvas.GetTop(_originalElement));
 
-            _overlayElement.TopOffset = getNextTopOffset(_overlayElement, _originalElement, _myCanvas, _startPoint);
+            //_overlayElement.TopOffset = getNextTopOffset(_overlayElement, _originalElement, _myCanvas, _startPoint);
 
         }
-            private void MyCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void MyCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.Source == _myCanvas)
             {
